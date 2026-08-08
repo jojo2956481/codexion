@@ -6,7 +6,7 @@
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:00:42 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 14:15:44 by lebeyssa         ###   ########lyon.fr   */
+/*   Updated: 2026/08/05 by lebeyssa                ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	code_error_parsing(int error)
 	if (error == -3)
 		printf("Error: the number of coders must be at least 1\n");
 	if (error == -4)
-		printf("Error: scheduler must be 'fifo' or 'edf'");
+		printf("Error: scheduler must be 'fifo', 'lifo' or 'edf'\n");
 	if (error == -5)
 		printf("Error: the number of compiles must be at least 1\n");
 }
@@ -43,6 +43,15 @@ int	ft_isdigit(int c)
 	return (1);
 }
 
+static char	sched_type_of(char *scheduler)
+{
+	if (!strcmp(scheduler, "fifo"))
+		return ('f');
+	if (!strcmp(scheduler, "lifo"))
+		return ('l');
+	return ('e');
+}
+
 int	init_data(char **datav, t_data *data)
 {
 	if (atoi(datav[1]) < 1)
@@ -56,13 +65,13 @@ int	init_data(char **datav, t_data *data)
 	data->time_to_refactor = atoi(datav[5]);
 	data->number_of_compiles_required = atoi(datav[6]);
 	data->dongle_cooldown = atoi(datav[7]);
-	if (strcmp(datav[8], "fifo") && strcmp(datav[8], "edf"))
+	if (strcmp(datav[8], "fifo") && strcmp(datav[8], "lifo")
+		&& strcmp(datav[8], "edf"))
 		return (-4);
-	else
-		data->scheduler = datav[8];
-	
+	data->scheduler = datav[8];
+	data->sched_type = sched_type_of(datav[8]);
+	data->queue.coder_ids = NULL;
 	return (0);
-	
 }
 
 long long	ft_atoi(char *nptr)

@@ -6,25 +6,30 @@
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 12:22:54 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 14:12:24 by lebeyssa         ###   ########lyon.fr   */
+/*   Updated: 2026/08/05 by lebeyssa                ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
+
 static int	one_codeur(t_codeur *codeur)
 {
-	if (codeur->left_dongle == codeur->right_dongle)
-	{
-		wait_dongle(codeur->left_dongle, codeur);
-		print_status(codeur, " has taken a dongle\n");
-		while (check_stop_release(NULL, NULL, codeur, 0) == 0)
-			usleep(1000);
-		release_dongle(codeur->left_dongle,
-			codeur->data->dongle_cooldown);
-		return (-1);
-	}
-	return (0);
+	t_data	*data;
+
+	if (codeur->left_dongle != codeur->right_dongle)
+		return (0);
+	data = codeur->data;
+	pthread_mutex_lock(&data->queue.lock);
+	codeur->left_dongle->is_locked = 1;
+	pthread_mutex_unlock(&data->queue.lock);
+	print_status(codeur, " has taken a dongle\n");
+	while (check_stop(data) == 0)
+		usleep(1000);
+	pthread_mutex_lock(&data->queue.lock);
+	codeur->left_dongle->is_locked = 0;
+	pthread_mutex_unlock(&data->queue.lock);
+	return (-1);
 }
 
 void	finish_mutex(t_codeur *codeur)
@@ -42,12 +47,13 @@ void	*pthread_codeur(void *data)
 	int			i;
 
 	codeur = (t_codeur *)data;
-	if (codeur->id % 2 == 0)
-		usleep(1000);
 	first = codeur->left_dongle;
 	second = codeur->right_dongle;
 	if (one_codeur(codeur))
+	{
+		finish_mutex(codeur);
 		return (NULL);
+	}
 	i = 0;
 	if (manage_codeur(codeur, i, first, second))
 		return (NULL);

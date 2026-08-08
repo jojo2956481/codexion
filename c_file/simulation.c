@@ -49,6 +49,7 @@ void	join_threads(t_data *data, t_simu *var_simu)
 
 static int	alloc(t_data *data, t_simu *var_simu)
 {
+	var_simu->finish = NULL;
 	var_simu->threads = malloc(sizeof(pthread_t) * data->number_of_coders);
 	if (!var_simu->threads)
 		return (-2);
@@ -59,6 +60,7 @@ static int	alloc(t_data *data, t_simu *var_simu)
 		var_simu->threads = NULL;
 		return (-2);
 	}
+	data->codeurs = var_simu->codeur;
 	var_simu->mutex = malloc(sizeof(t_dongle) * data->number_of_coders);
 	if (!var_simu->mutex)
 	{
