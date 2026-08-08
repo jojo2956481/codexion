@@ -6,7 +6,7 @@
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 13:10:44 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 14:12:24 by lebeyssa         ###   ########lyon.fr   */
+/*   Updated: 2026/08/08 16:46:54 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,10 @@ void	join_all_threads(t_simu	*var_simu, int y, int val)
 			var_simu->threads[i] = 0;
 			i++;
 		}
-		{
-			pthread_join(var_simu->t2, NULL);
-			var_simu->t2 = 0;
-		}
+		pthread_join(var_simu->t2, NULL);
+		var_simu->t2 = 0;
+		pthread_join(var_simu->ticker, NULL);
+		var_simu->ticker = 0;
 	}
 }
 
@@ -45,6 +45,7 @@ void	join_threads(t_data *data, t_simu *var_simu)
 		i++;
 	}
 	pthread_join(var_simu->t2, NULL);
+	pthread_join(var_simu->ticker, NULL);
 }
 
 static int	alloc(t_data *data, t_simu *var_simu)

@@ -12,22 +12,6 @@
 
 #include "codexion.h"
 
-
-static void	wait_until_ms(pthread_cond_t *cond, pthread_mutex_t *mutex, int ms)
-{
-	struct timespec	ts;
-	long long		wake_ms;
-
-	if (ms < 1)
-		ms = 1;
-	clock_gettime(CLOCK_REALTIME, &ts);
-	wake_ms = (long long)ts.tv_sec * 1000 + ts.tv_nsec / 1000000 + ms;
-	ts.tv_sec = wake_ms / 1000;
-	ts.tv_nsec = (wake_ms % 1000) * 1000000;
-	pthread_cond_timedwait(cond, mutex, &ts);
-}
-
-/* FIFO : le nouveau va en fin de file. */
 static void	push_fifo(t_data *data, t_codeur *c, int count)
 {
 	data->queue.coder_ids[count] = c->id;
@@ -74,7 +58,6 @@ void	queue_push(t_data *data, t_codeur *c)
 {
 	int	count;
 
-	pthread_mutex_lock(&data->queue.lock);
 	count = data->queue.count;
 	if (data->sched_type == 'f')
 		push_fifo(data, c, count);
@@ -84,7 +67,6 @@ void	queue_push(t_data *data, t_codeur *c)
 		push_edf(data, c, count);
 	data->queue.count++;
 	pthread_cond_broadcast(&data->queue.cond);
-	pthread_mutex_unlock(&data->queue.lock);
 }
 
 static void	queue_remove_locked(t_data *data, int coder_id)
@@ -180,30 +162,14 @@ static void	grant_all_runnable(t_data *data, long long now)
 		pthread_cond_broadcast(&data->queue.cond);
 }
 
-static long long	compute_wait_target(t_dongle *d1, t_dongle *d2, long long now)
-{
-	long long	target;
-
-	if (d1->is_locked || d2->is_locked)
-		return (now + 5);
-	target = d1->available_at;
-	if (d2->available_at > target)
-		target = d2->available_at;
-	if (target <= now)
-		return (now + 5);
-	return (target);
-}
-
 int	take_dongles(t_codeur *c)
 {
 	t_data		*data;
-	t_dongle	*d1;
-	t_dongle	*d2;
 	long long	now;
 
 	data = c->data;
-	queue_push(data, c);
 	pthread_mutex_lock(&data->queue.lock);
+	queue_push(data, c);
 	while (1)
 	{
 		if (check_stop(data))
@@ -218,16 +184,14 @@ int	take_dongles(t_codeur *c)
 			c->has_dongles = 1;
 			pthread_mutex_unlock(&data->queue.lock);
 			print_status(c, " has taken a dongle\n");
+			print_status(c, " has taken a dongle\n");
 			return (0);
 		}
 		now = get_timestamp_ms();
 		grant_all_runnable(data, now);
 		if (c->granted)
 			continue ;
-		d1 = (c->left_dongle < c->right_dongle) ? c->left_dongle : c->right_dongle;
-		d2 = (c->left_dongle < c->right_dongle) ? c->right_dongle : c->left_dongle;
-		wait_until_ms(&data->queue.cond, &data->queue.lock,
-			(int)(compute_wait_target(d1, d2, now) - now));
+		pthread_cond_wait(&data->queue.cond, &data->queue.lock);
 	}
 }
 

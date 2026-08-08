@@ -112,6 +112,7 @@ typedef struct s_simu
 {
 	pthread_t		*threads;
 	pthread_t		t2;
+	pthread_t		ticker;
 	t_codeur		*codeur;
 	t_dongle		*mutex;
 	t_print			print;
@@ -187,5 +188,7 @@ void		update_last_compile(t_codeur *c);
 
 
 void		*pthread_moniteur(void *data);
+
+void		*queue_ticker(void *arg);
 
 #endif

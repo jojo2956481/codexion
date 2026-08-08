@@ -6,17 +6,20 @@
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 12:23:15 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 14:12:24 by lebeyssa         ###   ########lyon.fr   */
+/*   Updated: 2026/08/08 17:06:15 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static	int	stop_and_display(t_monitor_var *var, int i)
+static	int	stop_and_display(t_monitor_var *var, int i, t_data *data)
 {
 	pthread_mutex_lock(&var->codeur[i].stop->stop_lock);
 	var->codeur[i].stop->bool_stop = 1;
 	pthread_mutex_unlock(&var->codeur[i].stop->stop_lock);
+	pthread_mutex_lock(&data->queue.lock);
+	pthread_cond_broadcast(&data->queue.cond);
+	pthread_mutex_unlock(&data->queue.lock);
 	pthread_mutex_lock(&var->codeur[i].print->print_lock);
 	printf("%lld %d %s", get_timestamp_ms() - var->codeur[i].start_time,
 		var->codeur[i].id, "burned out\n");
@@ -24,7 +27,7 @@ static	int	stop_and_display(t_monitor_var *var, int i)
 	return (1);
 }
 
-static int	check_stop_condition(t_monitor_var *var)
+static int	check_stop_condition(t_monitor_var *var, t_data *data)
 {
 	int	i;
 	int	all_done;
@@ -44,23 +47,33 @@ static int	check_stop_condition(t_monitor_var *var)
 		if (get_timestamp_ms() - get_last_compile(&var->codeur[i])
 			> get_time_to_burnout(var))
 		{
-			return (stop_and_display(var, i));
+			return (stop_and_display(var, i, data));
 		}
 	}
 	return (all_done);
 }
 
-void	*pthread_moniteur(void *data)
+void	*pthread_moniteur(void *arg)
 {
 	int				stop;
 	t_monitor_var	*var;
+	t_data			*data;
 
-	var = (t_monitor_var *)data;
+	var = (t_monitor_var *)arg;
+	data = var->data;
 	stop = 0;
 	while (!stop)
 	{
-		if (check_stop_condition(var))
+		if (check_stop_condition(var, data))
+		{
 			stop = 1;
+			pthread_mutex_lock(&data->stop->stop_lock);
+			data->stop->bool_stop = 1;
+			pthread_mutex_unlock(&data->stop->stop_lock);
+			pthread_mutex_lock(&data->queue.lock);
+			pthread_cond_broadcast(&data->queue.cond);
+			pthread_mutex_unlock(&data->queue.lock);
+		}
 		usleep(500);
 	}
 	return (NULL);

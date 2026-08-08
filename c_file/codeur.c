@@ -47,6 +47,8 @@ void	*pthread_codeur(void *data)
 	int			i;
 
 	codeur = (t_codeur *)data;
+	if (codeur->id % 2 == 0)
+		usleep(1000);
 	first = codeur->left_dongle;
 	second = codeur->right_dongle;
 	if (one_codeur(codeur))
