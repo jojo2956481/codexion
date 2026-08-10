@@ -5,13 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/28 12:22:54 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 by lebeyssa                ###   ########lyon.fr   */
+/*   Created: 2026/08/10 13:03:42 by lebeyssa          #+#    #+#             */
+/*   Updated: 2026/08/10 14:32:08 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
 
 static int	one_codeur(t_codeur *codeur)
 {
@@ -42,22 +41,18 @@ void	finish_mutex(t_codeur *codeur)
 void	*pthread_codeur(void *data)
 {
 	t_codeur	*codeur;
-	t_dongle	*first;
-	t_dongle	*second;
 	int			i;
 
 	codeur = (t_codeur *)data;
 	if (codeur->id % 2 == 0)
 		usleep(1000);
-	first = codeur->left_dongle;
-	second = codeur->right_dongle;
 	if (one_codeur(codeur))
 	{
 		finish_mutex(codeur);
 		return (NULL);
 	}
 	i = 0;
-	if (manage_codeur(codeur, i, first, second))
+	if (manage_codeur(codeur, i))
 		return (NULL);
 	finish_mutex(codeur);
 	return (NULL);

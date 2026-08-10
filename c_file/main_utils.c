@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/30 14:00:42 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 by lebeyssa                ###   ########lyon.fr   */
+/*   Created: 2026/08/10 13:02:54 by lebeyssa          #+#    #+#             */
+/*   Updated: 2026/08/10 13:43:42 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,15 +43,6 @@ int	ft_isdigit(int c)
 	return (1);
 }
 
-static char	sched_type_of(char *scheduler)
-{
-	if (!strcmp(scheduler, "fifo"))
-		return ('f');
-	if (!strcmp(scheduler, "lifo"))
-		return ('l');
-	return ('e');
-}
-
 int	init_data(char **datav, t_data *data)
 {
 	if (atoi(datav[1]) < 1)
@@ -69,7 +60,6 @@ int	init_data(char **datav, t_data *data)
 		&& strcmp(datav[8], "edf"))
 		return (-4);
 	data->scheduler = datav[8];
-	data->sched_type = sched_type_of(datav[8]);
 	data->queue.coder_ids = NULL;
 	return (0);
 }

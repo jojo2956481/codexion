@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/28 12:23:09 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 by lebeyssa                ###   ########lyon.fr   */
+/*   Created: 2026/08/10 13:02:28 by lebeyssa          #+#    #+#             */
+/*   Updated: 2026/08/10 14:25:07 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,43 +27,48 @@ int	init_dongle_mutex(t_simu *var_simu, t_data *data)
 	return (0);
 }
 
-int	init_queue(t_data *data)
+int	init_queue(t_simu *var_simu)
 {
+	t_data	*data;
+
+	data = var_simu->data;
 	if (pthread_mutex_init(&data->queue.lock, NULL))
-		return (-1);
+		return (free_alloc(var_simu, -1, -1));
 	if (pthread_cond_init(&data->queue.cond, NULL))
-		return (-1);
+		return (free_alloc(var_simu, -1, -1));
 	data->queue.coder_ids = malloc(sizeof(int) * data->number_of_coders);
 	if (!data->queue.coder_ids)
-		return (-1);
+		return (free_alloc(var_simu, -1, -2));
 	data->queue.nb_coders = data->number_of_coders;
 	data->queue.count = 0;
 	return (0);
 }
 
-int	init_mutex_s_p_f(t_simu *var_simu)
+int	init_mutex_s_p_f(t_simu *var_simu, int error)
 {
 	int	i;
 
 	if (pthread_mutex_init(&var_simu->stop_var.stop_lock, NULL))
-		return (-1);
+		return (free_alloc(var_simu, -1, -1));
 	var_simu->stop_var.bool_stop = 0;
 	if (pthread_mutex_init(&var_simu->print.print_lock, NULL))
-		return (-1);
-	var_simu->finish = malloc(sizeof(t_finish) * var_simu->data->number_of_coders);
+		return (free_alloc(var_simu, -1, -1));
+	var_simu->finish = malloc(sizeof(t_finish)
+			* var_simu->data->number_of_coders);
 	if (!var_simu->finish)
-		return (-1);
+		return (free_alloc(var_simu, -1, -2));
 	i = -1;
 	while (++i < var_simu->data->number_of_coders)
 	{
 		if (pthread_mutex_init(&var_simu->finish[i].finish_lock, NULL))
-			return (-1);
+			return (free_alloc(var_simu, -1, -1));
 		var_simu->finish[i].finished = 0;
 		var_simu->finish[i].nb_compiles_done = 0;
 	}
 	var_simu->data->stop = &var_simu->stop_var;
-	if (init_queue(var_simu->data))
-		return (-1);
+	error = init_queue(var_simu);
+	if (error)
+		return (error);
 	return (0);
 }
 
@@ -80,7 +85,7 @@ int	init_monitor(t_data *data, t_simu *var_simu)
 	return (0);
 }
 
-static int	boucle_codeur(t_data *data, t_simu *var_simu,
+int	boucle_codeur(t_data *data, t_simu *var_simu,
 		long long start_time, int i)
 {
 	while (++i < data->number_of_coders)
@@ -102,14 +107,4 @@ static int	boucle_codeur(t_data *data, t_simu *var_simu,
 			return (destroy_free_all_mut(var_simu, i, -1));
 	}
 	return (create_thread(data, var_simu));
-}
-
-int	init_codeur(t_data *data, t_simu *var_simu)
-{
-	long long	start_time;
-	int			i;
-
-	start_time = get_timestamp_ms();
-	i = -1;
-	return (boucle_codeur(data, var_simu, start_time, i));
 }

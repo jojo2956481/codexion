@@ -6,7 +6,7 @@
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 13:10:44 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/08 16:46:54 by lebeyssa         ###   ########lyon.fr   */
+/*   Updated: 2026/08/10 14:24:38 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ static void	finish_simu(t_data *data, t_simu *var_simu)
 	destroy_cond(var_simu, -1);
 	destroy_all_mutex(var_simu, -1);
 	destroy_mutex(var_simu);
-	free_alloc(var_simu, -1);
+	free_alloc(var_simu, -1, 0);
 }
 
 int	manage_simu(t_data *data, int error)
@@ -93,7 +93,8 @@ int	manage_simu(t_data *data, int error)
 	error = init_dongle_mutex(&var_simu, data);
 	if (error < 0)
 		return (error);
-	if (init_mutex_s_p_f(&var_simu) != 0)
+	error = init_mutex_s_p_f(&var_simu, error);
+	if (error)
 		return (-1);
 	error = init_monitor(data, &var_simu);
 	if (error < 0)

@@ -5,13 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/28 12:23:02 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/07 by lebeyssa                ###   ########lyon.fr   */
+/*   Created: 2026/08/10 13:01:38 by lebeyssa          #+#    #+#             */
+/*   Updated: 2026/08/10 13:01:55 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
 
 void	free_all(t_simu *var_simu, int i)
 {
@@ -24,7 +23,6 @@ void	free_all(t_simu *var_simu, int i)
 		var_simu->data->queue.coder_ids = NULL;
 	}
 }
-
 
 void	destroy_cond(t_simu *var_simu, int y)
 {
@@ -63,7 +61,7 @@ void	destroy_mutex(t_simu *var_simu)
 	}
 }
 
-void	free_alloc(t_simu *var_simu, int i)
+int	free_alloc(t_simu *var_simu, int i, int error)
 {
 	if (i == -1)
 		i = var_simu->data->number_of_coders;
@@ -71,5 +69,7 @@ void	free_alloc(t_simu *var_simu, int i)
 	free(var_simu->threads);
 	free(var_simu->codeur);
 	free(var_simu->mutex);
-	free(var_simu->finish);
+	if (var_simu->finish)
+		free(var_simu->finish);
+	return (error);
 }

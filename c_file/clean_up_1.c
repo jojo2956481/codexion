@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/23 15:55:11 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 by lebeyssa                ###   ########lyon.fr   */
+/*   Created: 2026/08/10 13:02:06 by lebeyssa          #+#    #+#             */
+/*   Updated: 2026/08/10 13:33:31 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ int	destroy_free(t_simu *var_simu, int i, int error)
 {
 	destroy_cond(var_simu, i);
 	destroy_all_mutex(var_simu, i);
-	free_alloc(var_simu, i);
+	free_alloc(var_simu, i, 0);
 	return (error);
 }
 
@@ -38,7 +38,7 @@ int	destroy_free_all(t_simu *var_simu, int i, int val)
 	j = -1;
 	while (++j < i)
 		pthread_mutex_destroy(&var_simu->codeur[j].codeur_lock);
-	free_alloc(var_simu, -1);
+	free_alloc(var_simu, -1, 0);
 	return (-3);
 }
 
@@ -50,13 +50,11 @@ int	destroy_free_all_mut(t_simu *var_simu, int i, int val)
 	destroy_cond(var_simu, 0);
 	destroy_all_mutex(var_simu, 0);
 	destroy_mutex(var_simu);
-	if (i == 0)
-		pthread_mutex_destroy(&var_simu->codeur[i].codeur_lock);
 	while (j < i)
 	{
 		pthread_mutex_destroy(&var_simu->codeur[j].codeur_lock);
 		j++;
 	}
-	free_alloc(var_simu, 0);
+	free_alloc(var_simu, 0, 0);
 	return (val);
 }

@@ -5,17 +5,15 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lebeyssa <lebeyssa@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/01 16:15:25 by lebeyssa          #+#    #+#             */
-/*   Updated: 2026/08/05 by lebeyssa                ###   ########lyon.fr   */
+/*   Created: 2026/08/10 13:03:06 by lebeyssa          #+#    #+#             */
+/*   Updated: 2026/08/10 14:28:26 by lebeyssa         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-int	manage_codeur(t_codeur *codeur, int i, t_dongle *first, t_dongle *second)
+int	manage_codeur(t_codeur *codeur, int i)
 {
-	(void)first;
-	(void)second;
 	while (i < codeur->data->number_of_compiles_required)
 	{
 		if (take_dongles(codeur))
