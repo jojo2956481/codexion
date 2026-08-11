@@ -134,12 +134,13 @@ long long	ft_atoi(char *nptr);
 
 
 int			init_dongle_mutex(t_simu *var_simu, t_data *data);
-int			init_queue(t_data *data);
-int			init_mutex_s_p_f(t_simu *var_simu);
+int			init_queue(t_simu *var_simu);
+int			init_mutex_s_p_f(t_simu *var_simu, int error);
 int			init_monitor(t_data *data, t_simu *var_simu);
 int			init_codeur(t_data *data, t_simu *var_simu);
 int			create_thread(t_data *data, t_simu *var_simu);
-
+int			boucle_codeur(t_data *data, t_simu *var_simu,
+				long long start_time, int i);
 
 void		join_all_threads(t_simu *var_simu, int y, int val);
 void		join_threads(t_data *data, t_simu *var_simu);
@@ -150,7 +151,7 @@ void		free_all(t_simu *var_simu, int i);
 void		destroy_cond(t_simu *var_simu, int y);
 void		destroy_all_mutex(t_simu *var_simu, int y);
 void		destroy_mutex(t_simu *var_simu);
-void		free_alloc(t_simu *var_simu, int i);
+int			free_alloc(t_simu *var_simu, int i, int error);
 int			destroy_free(t_simu *var_simu, int i, int error);
 int			destroy_free_all(t_simu *var_simu, int i, int val);
 int			destroy_free_all_mut(t_simu *var_simu, int i, int val);
@@ -166,10 +167,13 @@ int			is_priority(t_data *data, int coder_id);
 int			check_stop(t_data *data);
 int			take_dongles(t_codeur *c);
 void		release_dongles(t_codeur *c);
+void		queue_remove_locked(t_data *data, int coder_id);
+void		order_dongles(t_codeur *cd, t_dongle **e1, t_dongle **e2);
+int			try_grant(t_codeur *cd, long long now);
+int			handle_stop(t_data *data, t_codeur *c);
+int			handle_granted(t_data *data, t_codeur *c);
 
-
-int			manage_codeur(t_codeur *codeur, int i, t_dongle *first,
-				t_dongle *second);
+int			manage_codeur(t_codeur *codeur, int i);
 
 
 int			check_stop_release(t_codeur *codeur, int release);
